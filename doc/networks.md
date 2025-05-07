@@ -1,8 +1,15 @@
 # コンテナのネットワーク設計
 
-ネットワークドライバーはmacvlanに設定。デフォルトのbridgeは本番環境では非推奨という事で。
+~~ネットワークドライバーはmacvlanに設定。デフォルトのbridgeは本番環境では非推奨という事で。~~
 
-- docker-compose.ymlのネットワーク構成
+本番環境でコンテナオーケストレーションを使わない場合、**ユーザー定義の bridge ネットワーク**の利用が推奨されています。ユーザー定義の bridge ネットワークは、デフォルトの bridge ネットワークよりも分離性や柔軟性、DNS解決機能が優れており、複数のコンテナを安全かつ効率的に管理できます。  
+デフォルトの bridge ネットワークは技術的な制約が多く、本番環境には推奨されていません。ユーザー定義ネットワークを使うことで、コンテナ間通信の制御やネットワーク設定のカスタマイズが容易になります  
+[Differences between user-defined bridges and the default bridge](https://docs.docker.com/engine/network/drivers/bridge/#differences-between-user-defined-bridges-and-the-default-bridge)  
+[Bridge network driver](https://docs.docker.com/engine/network/drivers/bridge/)
+
+特殊な要件（物理ネットワークへの直接接続や、ネットワーク分離の強化など）がある場合は、macvlan や none ドライバーも検討できますが、一般的にはユーザー定義の bridge ネットワークが最適です。
+
+- docker-compose.ymlのネットワーク構成（仮）
 
 ```yml
 version: '3.8'
