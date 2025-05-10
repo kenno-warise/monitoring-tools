@@ -5,4 +5,4 @@
 # 「./docker_nginx.sh」
 
 # echo 'Hello Nginx'
-docker run --name nginx -d -p 8080:80 nginx:latest
+docker run --name nginx -v ./mysite:/usr/share/nginx/html:ro -d -p 8080:80 nginx:latest
