@@ -4,4 +4,5 @@
 # 実行コマンド
 # 「./docker_nginx.sh」
 
-echo 'Hello Nginx'
+# echo 'Hello Nginx'
+docker run --name nginx -d -p 8080:80 nginx:latest
