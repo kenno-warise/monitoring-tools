@@ -1,5 +1,5 @@
 #!/bin/bash
-# run docker container nginx
+# run docker container prometheus
 # 2025/5/17
 # 実行コマンド
 # 「./docker_prom.sh」
