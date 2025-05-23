@@ -13,6 +13,7 @@ docker run --name backend -v ./mysite:/usr/share/nginx/html --network mynetwork 
 # Nginxの設定ファイルを元にリバースプロキシを実行
 docker run --name nginx \
   -v ./ssl:/etc/ssl \
+  -v ./nginx/.htpasswd:/etc/nginx/.htpasswd \
   -v ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
   --network mynetwork \
   -d -p 80:80 -p 443:443 \
