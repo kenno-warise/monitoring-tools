@@ -1,5 +1,22 @@
 # 気づいた事や課題をメモ
 
+## 2025-5-25
+
+- Grafnaのダッシュボード作成で、CPU、Memory、Diskの使用率をグラフで表示する際に、Diskのメトリクスを取得するためのnode_filesystem_...がホストOSからしっかり取得できていなかったので、ボリュームマウントを変更してホスト側のマウントの伝播タイプを変更。
+- 結果的に、node-expoter公式ドキュメント通りの設定（-v /:/host:ro,rslaveが重要）。
+
+伝播タイプprivateからsharedに変更
+
+```shell
+$ sudo mount --make-rshared /
+```
+
+現在の伝播タイプを確認
+
+```shell
+findmnt -o SOURCE,TARGET,PROPAGATION /
+```
+
 - Nginxの設定ファイルでは、開発環境はopensslの自己証明書、本番環境はLet's EncryptのSSL証明書を各自で利用するので気を付ける。
 - 本番環境ではLet's Encryptを更新する際、.well-known/...を参照するので、マウントする際に気を付ける。
 

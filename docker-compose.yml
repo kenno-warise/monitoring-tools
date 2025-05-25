@@ -3,7 +3,6 @@
 # ネットワークを明示的に指定 → すべてのコンテナがmynetworkというカスタムブリッジネットワーク上で動作する。
 # これで、各コンテナが適切な順序で起動し、依存関係に基づいてスムーズに動作する。
 
-version: '3.8'
 services:
   prometheus:
     image: prom/prometheus:v3.4.0  # 5月24日時点で最新
@@ -21,16 +20,17 @@ services:
       timeout: 5s
       retries: 3
 
-  node:
+  node:  # node-expoter公式ドキュメントの設定（network_modeの部分だけカスタムネットワークに変更）。
     image: quay.io/prometheus/node-exporter:v1.9.1  # 5月24日時点で最新
     container_name: node
-    networks:  # カスタムブリッジネットワーク。
+    command:
+      - '--path.rootfs=/host'
+    networks:
       - mynetwork
+    pid: host
+    restart: unless-stopped
     volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-    restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
-    command: --path.rootfs=/host
+      - '/:/host:ro,rslave'
     healthcheck:  # コンテナが立ち上がったかチェック。
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:9100"]
       interval: 10s
@@ -39,7 +39,7 @@ services:
     depends_on:  # 依存関係のコンテナを設定。
       prometheus:
         condition: service_healthy
-
+  
   grafana:
     image: grafana/grafana-oss:12.0.1  # 5月24日時点で最新
     container_name: grafana
@@ -81,3 +81,26 @@ services:
 networks:  # カスタムブリッジネットワークの作成。
   mynetwork:
     driver: bridge
+
+# node:
+#   image: quay.io/prometheus/node-exporter:v1.9.1  # 5月24日時点で最新
+#   container_name: node
+#   networks:  # カスタムブリッジネットワーク。
+#     - mynetwork
+#   volumes:
+#     - /proc:/host/proc:ro  # カーネル情報
+#     - /sys:/host/sys:ro  # システム情報
+#     - /dev:/host/dev:ro  # デバイス関連、物理ディスクやデバイスファイルのdir
+#   restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
+#   command:
+#     - "--path.rootfs=/host"
+#     - "--collector.filesystem"  # ファイルシステムのメトリクスを追加
+#   healthcheck:  # コンテナが立ち上がったかチェック。
+#     test: ["CMD", "wget", "-q", "--spider", "http://localhost:9100"]
+#     interval: 10s
+#     timeout: 5s
+#     retries: 3
+#   depends_on:  # 依存関係のコンテナを設定。
+#     prometheus:
+#       condition: service_healthy
+
