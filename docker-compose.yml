@@ -24,11 +24,11 @@ services:
     image: quay.io/prometheus/node-exporter:v1.9.1  # 5月24日時点で最新
     container_name: node
     command:
-      - '--path.rootfs=/host'
-    networks:
+      - "--path.rootfs=/host"
+    networks:  # カスタムブリッジネットワーク。
       - mynetwork
-    pid: host
-    restart: unless-stopped
+    pid: host  # ホストOSのプロセスID (PID) 名前空間をコンテナと共有
+    restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
     volumes:
       - '/:/host:ro,rslave'
     healthcheck:  # コンテナが立ち上がったかチェック。
@@ -81,26 +81,4 @@ services:
 networks:  # カスタムブリッジネットワークの作成。
   mynetwork:
     driver: bridge
-
-# node:
-#   image: quay.io/prometheus/node-exporter:v1.9.1  # 5月24日時点で最新
-#   container_name: node
-#   networks:  # カスタムブリッジネットワーク。
-#     - mynetwork
-#   volumes:
-#     - /proc:/host/proc:ro  # カーネル情報
-#     - /sys:/host/sys:ro  # システム情報
-#     - /dev:/host/dev:ro  # デバイス関連、物理ディスクやデバイスファイルのdir
-#   restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
-#   command:
-#     - "--path.rootfs=/host"
-#     - "--collector.filesystem"  # ファイルシステムのメトリクスを追加
-#   healthcheck:  # コンテナが立ち上がったかチェック。
-#     test: ["CMD", "wget", "-q", "--spider", "http://localhost:9100"]
-#     interval: 10s
-#     timeout: 5s
-#     retries: 3
-#   depends_on:  # 依存関係のコンテナを設定。
-#     prometheus:
-#       condition: service_healthy
 
