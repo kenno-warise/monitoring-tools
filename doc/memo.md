@@ -1,5 +1,21 @@
 # 気づいた事や課題をメモ
 
+## 2025-5-27
+
+- docker-compose.ymlのnginxコンテナを開発用と本番用に分けたので、コマンド実行時は--profile=dev,prodを付与する。
+
+開発環境でのコンポース実行
+
+```shell
+$ docker compose --profile dev up -d
+```
+
+コンテナを停止して削除するとき
+
+```shell
+$ docker compose --profile dev down
+```
+
 ## 2025-5-25
 
 - Grafnaのダッシュボード作成で、CPU、Memory、Diskの使用率をグラフで表示する際に、Diskのメトリクスを取得するためのnode_filesystem_...がホストOSからしっかり取得できていなかったので、ボリュームマウントを変更してホスト側のマウントの伝播タイプを変更。

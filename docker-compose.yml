@@ -61,15 +61,38 @@ services:
       node:
         condition: service_healthy
 
-  nginx:
+  dev-nginx:
+    profiles:
+      - dev
     image: nginx:1.28.0  # 5月24日時点で最新
-    container_name: nginx
+    container_name: dev-nginx
     networks:  # カスタムブリッジネットワーク。
       - mynetwork
     volumes:
       - ./secret/ssl:/etc/ssl
       - ./secret/.htpasswd:/etc/nginx/.htpasswd
-      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/conf.d/dev.conf:/etc/nginx/conf.d/dev.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
+    depends_on:  # 依存関係のコンテナを設定。
+      grafana:
+        condition: service_healthy
+
+  prod-nginx:
+    profiles:
+      - prod
+    image: nginx:1.28.0  # 5月24日時点で最新
+    container_name: prod-nginx
+    networks:  # カスタムブリッジネットワーク。
+      - mynetwork
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/www:/var/www  # Let's Encryptの証明書を配置するディレクトリ
+      - /var/log/nginx:/var/log/nginx  # ログファイルの同期
+      - ./nginx/.htpasswd:/etc/nginx/.htpasswd  # Basic認証用ファイル
+      - ./nginx/conf.d/prod.conf:/etc/nginx/conf.d/prod.conf  # 本願環境用の設定ファイル
     ports:
       - "80:80"
       - "443:443"
