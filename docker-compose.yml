@@ -46,7 +46,8 @@ services:
     networks:  # カスタムブリッジネットワーク。
       - mynetwork
     volumes:
-      - ./grafana/data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - grafana_data:/var/lib/grafana  # 本番環境では権限の関係でエラーとなりコンテナが立ち上がらないのでボリュームマウントを作成するといいらしい。
     ports:
       - "3000:3000"
     restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
@@ -72,6 +73,7 @@ services:
       - ./secret/ssl:/etc/ssl
       - ./secret/.htpasswd:/etc/nginx/.htpasswd
       - ./nginx/conf.d/dev.conf:/etc/nginx/conf.d/dev.conf
+    command: ["sh", "-c", "rm -f /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]  # 'daemon of'はNginxをフォアグラウンドで実行する（コンテナプロセスが終了しないように）。
     ports:
       - "80:80"
       - "443:443"
@@ -89,17 +91,19 @@ services:
       - mynetwork
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
-      - /var/www:/var/www  # Let's Encryptの証明書を配置するディレクトリ
-      - /var/log/nginx:/var/log/nginx  # ログファイルの同期
-      - ./nginx/.htpasswd:/etc/nginx/.htpasswd  # Basic認証用ファイル
+      - /var/www:/var/www  # Let's Encryptの証明書を配置するディレクトリとBacik認証ファイル
       - ./nginx/conf.d/prod.conf:/etc/nginx/conf.d/prod.conf  # 本願環境用の設定ファイル
-    ports:
-      - "80:80"
-      - "443:443"
+    command: ["sh", "-c", "rm -f /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]  # 'daemon of'はNginxをフォアグラウンドで実行する（コンテナプロセスが終了しないように）。
+    ports:  # ホスト側のポートで80番443番が使用済みなので8080と8443で割り当て
+      - "8080:80" 
+      - "8443:443"
     restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
     depends_on:  # 依存関係のコンテナを設定。
       grafana:
         condition: service_healthy
+          
+volumes:
+  grafana_data:
 
 networks:  # カスタムブリッジネットワークの作成。
   mynetwork:
