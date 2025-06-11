@@ -1,0 +1,72 @@
+name: Deploy Monitoring Stack to Production
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  # ==========================================
+  # PrometheusとNginxの設定ファイル検証フェーズ
+  # ==========================================
+  validate-configs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run Prometheus container and validation config
+        run: |
+          docker run -d --name prometheus -v ./prometheus:/etc/prometheus prom/prometheus
+          docker exec -it prometheus promtool check config /etc/prometheus/prometheus.yml
+          docker rm -f prometheus
+
+      - name: Create secret directories and files
+        if: ${{ !env.ACT }}
+        run: |
+          mkdir -p ./secret/ssl  # ディレクトリを作成
+          echo "${{ secrets.SSL_CERT }}" > ./secret/ssl/cert.pem
+          echo "${{ secrets.SSL_KEY }}" > ./secret/ssl/key.pem
+          echo "${{ secrets.HTPASSWD }}" > ./secret/.htpasswd
+          
+      - name: Run Grafana and Nginx container is validation config
+        run: |
+          docker run -d --name grafana --network mynetwork -p 3000:3000 grafana/grafana
+          docker run --rm --network mynetwork \
+          -v ./nginx/conf.d/dev.conf:/etc/nginx/conf.d/dev.conf \
+          -v ./secret/ssl:/etc/ssl \
+          -v ./secret/.htpasswd:/etc/nginx/.htpasswd \
+          nginx nginx -t
+          docker rm -f grafana
+
+  # ==========================================
+  # デプロイフェーズ
+  # ==========================================
+  deploy:
+    needs: validate-configs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to Production
+        if: ${{ !env.ACT }}
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          host: ${{ secrets.SSH_DOMAIN }}
+          script: |
+            echo "${{ secrets.SUDO_PASS }}" | sudo -S docker ps
+            # ./setup.sh
+
+      - name: Simulate Deployment (for act)
+        if: ${{ env.ACT }}
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          host: ${{ secrets.SSH_DOMAIN }}
+          script: |
+            echo "${{ secrets.SUDO_PASS }}" | sudo -S docker ps
