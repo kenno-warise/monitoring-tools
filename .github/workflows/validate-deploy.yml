@@ -30,6 +30,7 @@ jobs:
           
       - name: Run Grafana and Nginx container is validation config
         run: |
+          docker network create mynetwork
           docker run -d --name grafana --network mynetwork -p 3000:3000 grafana/grafana
           docker run --rm --network mynetwork \
           -v ./nginx/conf.d/dev.conf:/etc/nginx/conf.d/dev.conf \
