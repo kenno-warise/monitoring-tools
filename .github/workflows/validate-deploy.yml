@@ -24,8 +24,8 @@ jobs:
         if: ${{ !env.ACT }}
         run: |
           mkdir -p ./secret/ssl  # ディレクトリを作成
-          echo "${{ secrets.SSL_CERT }}" > ./secret/ssl/cert.pem
-          echo "${{ secrets.SSL_KEY }}" > ./secret/ssl/key.pem
+          echo "${{ secrets.SSL_CERT }}" > ./secret/ssl/my_certificate.crt
+          echo "${{ secrets.SSL_KEY }}" > ./secret/ssl/my_private.key
           echo "${{ secrets.HTPASSWD }}" > ./secret/.htpasswd
           
       - name: Run Grafana and Nginx container is validation config
