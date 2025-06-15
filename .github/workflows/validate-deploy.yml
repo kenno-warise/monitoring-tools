@@ -147,7 +147,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           host: ${{ secrets.SSH_DOMAIN }}
           script: |
-            echo "Other files: ${{ steps.filter.outputs.other }}"
+            echo "Other files: ${{ env.CHANGE_FILE }}"
             cd ~/monitoring-tools
             echo "${{ secrets.SUDO_PASS }}" | sudo -S docker compose --profile prod restart
             echo "${{ secrets.SUDO_PASS }}" | sudo -S docker compose ps
@@ -164,7 +164,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           host: ${{ secrets.SSH_DOMAIN }}
           script: |
-            echo "Changed files: ${{ steps.filter.outputs.compose }}"
+            echo "Changed files: ${{ env.CHANGE_FILE }}"
             cd ~/monitoring-tools
             echo "${{ secrets.SUDO_PASS }}" | sudo -S docker compose --profile prod down
             echo "${{ secrets.SUDO_PASS }}" | sudo -S docker compose --env-file ~/.env --profile prod up -d
