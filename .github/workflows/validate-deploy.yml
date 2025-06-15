@@ -118,29 +118,30 @@ jobs:
       # 更新されたファイルがcomposeかotherか判定する
       # ==========================================
       - name: Check changed files
-        id: check_files
-        run: |
-          git diff --name-only HEAD^
-          if git diff --name-only HEAD^ | grep -o "compose.yml"; then
-            echo "CHANGE_FILE=compose" >> $GITHUB_ENV
-          else
-            echo "CHANGE_FILE=other" >> $GITHUB_ENV
-          fi
-        # if: ${{ env.ACT != true }}
-        # id: filter
-        # uses: dorny/paths-filter@v3
-        # with:
-        #   filters:
-        #     compose:
-        #       - 'compose.yml'
-        #     other:
-        #       - '**'
+        # id: check_files
+        # run: |
+        #   git diff --name-only HEAD^
+        #   if git diff --name-only HEAD^ | grep -o "compose.yml"; then
+        #     echo "CHANGE_FILE=compose" >> $GITHUB_ENV
+        #   else
+        #     echo "CHANGE_FILE=other" >> $GITHUB_ENV
+        #   fi
+        if: ${{ env.ACT != true }}
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters:
+            compose:
+              - 'compose.yml'
+            other:
+              - '**'
 
       # ================================================
       # compose以外のファイルが更新されたらリスタートする
       # ================================================
       - name: Restart Docker Compose (if other files changed)
-        if: ${{ !env.ACT && env.CHANGE_FILE == 'other' }}
+        # if: ${{ !env.ACT && env.CHANGE_FILE == 'other' }}
+        if: ${{ !env.ACT && steps.filter.outputs.other == 'true' }}
         uses: appleboy/ssh-action@v0.1.6
         with:
           key: ${{ secrets.SSH_KEY }}
@@ -157,7 +158,8 @@ jobs:
       # composeが更新されたらダウンして起動する
       # ======================================
       - name: Start Docker Compose (if compose.yml changed)
-        if: ${{ !env.ACT && env.CHANGE_FILE == 'compose' }}
+        # if: ${{ !env.ACT && env.CHANGE_FILE == 'compose' }}
+        if: ${{ !env.ACT && steps.filter.outputs.compose == 'true' }}
         uses: appleboy/ssh-action@v0.1.6
         with:
           key: ${{ secrets.SSH_KEY }}
