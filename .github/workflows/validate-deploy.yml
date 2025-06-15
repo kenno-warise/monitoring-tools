@@ -126,7 +126,7 @@ jobs:
         #   else
         #     echo "CHANGE_FILE=other" >> $GITHUB_ENV
         #   fi
-        if: ${{ env.ACT != true }}
+        if: ${{ env.ACT }}
         id: filter
         uses: dorny/paths-filter@v3
         with:
