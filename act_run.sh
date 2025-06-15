@@ -23,6 +23,14 @@
 
 echo "変数のチェックをします============"
 
+# 1.ACT_SSH_KEY_DIRにプライベートキーのディレクトリ
+if [ -z "${ACT_SSH_KEY}" ]; then
+  echo "ACT_SSH_KEYは空なので作成します。"
+  ACT_SSH_KEY_DIR="~/.ssh/id_rsa"
+else
+  echo "ACT_SSH_KEY_DIRは作成済みです。"
+fi
+
 # 1.ACT_SSH_KEYにプライベートキー
 if [ -z "${ACT_SSH_KEY}" ]; then
   echo "ACT_SSH_KEYは空なので作成します。"
@@ -76,4 +84,4 @@ fi
 
 echo "actを実行します==================="
 
-act -s SSH_KEY="${ACT_SSH_KEY}" -s SSH_PORT="${ACT_SSH_PORT}" -s SSH_DOMAIN="${ACT_SSH_DOMAIN}" -s SSH_USER="${ACT_SSH_USER}" -s SUDO_PASS="${ACT_SUDO_PASS}"
+act -s SSH_KEY_DIR=${ACT_SSH_KEY_DIR} -s SSH_KEY="${ACT_SSH_KEY}" -s SSH_PORT="${ACT_SSH_PORT}" -s SSH_DOMAIN="${ACT_SSH_DOMAIN}" -s SSH_USER="${ACT_SSH_USER}" -s SUDO_PASS="${ACT_SUDO_PASS}"

@@ -1,6 +1,5 @@
 # 監視サイトのプロキシ
 
-
 # =======================
 # SSLリダイレクト
 # hostでのポートは8080で割り当てしているのでhttp://domain:8080でアクセスできる。
@@ -8,8 +7,8 @@
 server {
     listen       80 default_server;
     listen  [::]:80 default_server;  # ipv6に対応
-    server_name ip-address free-domain;
-    return 301 https://free-domain:8443$request_uri;
+    server_name ${IP_ADDRESS} ${FREE_DOMAIN};
+    return 301 https://${FREE_DOMAIN}:8443$request_uri;
 }
 
 # WebSocket の接続を適切に処理するためのヘッダーを設定
@@ -33,15 +32,17 @@ upstream grafana {
 server {
     listen       443 ssl;
     listen  [::]:443 ssl;  # ipv6に対応
-    server_name free-domain;
-    ssl_certificate /etc/letsencrypt/live/ssl-domain/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/ssl-domain/privkey.pem;
+    server_name ${FREE_DOMAIN};
+    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
     location /.well-known/acme-challenge/ {
-        root /var/www/free-domain;
+        root /var/www/${FREE_DOMAIN};
     }
     location / {
-         auth_basic "Restricted Area"; # 認証画面のタイトル
-         auth_basic_user_file /var/www/secret/.htpasswd; # パスワードファイルの指定
+         allow ${TARGET_IP};  # 許可するIP
+         deny all;  # その他のアクセスを拒否
+         # auth_basic "Restricted Area"; # 認証画面のタイトル
+         # auth_basic_user_file /var/www/secret/.htpasswd; # パスワードファイルの指定
          proxy_pass http://grafana;
          proxy_http_version 1.1;
          proxy_set_header Upgrade $http_upgrade;

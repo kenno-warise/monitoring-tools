@@ -1,0 +1,15 @@
+.env
+.git
+.github
+.gitignore
+.rsyncignore
+README.md
+act_run.sh
+dev.mount_change.sh
+doc
+docker_backend_nginx.sh
+docker_grafana_nginx.sh
+grafana
+mysite
+nginx/conf.d
+secret
