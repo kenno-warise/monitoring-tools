@@ -1,5 +1,52 @@
 # 気づいた事や課題をメモ
 
+## 2025-6-15
+
+ワークフローのrsyncコマンドで差分転送する際に除外する候補のファイル群はリポジトリを更新するたびに除外候補を作成するか検討。
+
+### 本番環境のNginxに許可したIPアドレスを動的に更新する流れ
+
+スクリプト（update_ip.sh）の作成
+
+```script
+#!/bin/bash
+
+IP=$(curl -s ifconfig.me)
+ssh -p 2222 user@server "echo 'allow $IP;' | sudo tee /etc/nginx/conf.d/ip_whitelist.conf && sudo systemctl reload nginx"
+```
+
+実行権限を付与
+
+```bash
+$ chmod +x update_ip.sh
+```
+
+crontabを開いて追記
+
+```
+$ crontab -e
+```
+
+以下を追記
+
+```
+@reboot /path/to/update_ip.sh
+```
+
+PCが起動される度に上記のスクリプトが実行される。
+
+## 2025-6-13
+
+### 自動化スクリプトの作成
+
+問題：本番環境でdocker compose downしてからdocker compose up -dするとグラフデータがリセットされてしまう。ダッシュボードは無事。恐らくPrometheus側のデータがリセットされているだけ。
+
+- 一般的には本番環境でgitは使用しない。
+- 本番環境へ新規でリポジトリを転送する場合はscp、差分更新の場合はrsyncを使う。
+- 初回本番環境でのセットアップは手動による環境変数等の設定が必要。次回から自動化デプロイ。
+- 小規模や人命に関わらないようなシステムの場合はリリースの自動化ケースもある。
+- 機密情報はActionsのSecretsに登録
+
 ## 2025-6-7
 
 ### 自動化スクリプトで必要な資料

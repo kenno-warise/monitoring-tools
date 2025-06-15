@@ -10,9 +10,14 @@ services:
     networks:  # カスタムブリッジネットワーク。
       - mynetwork
     volumes:
+      - prometheus_data:/prometheus
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "127.0.0.1:9090:9090"
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"  # 30日間保持
+      - "--storage.tsdb.retention.size=2GB"  # 最大2GBまで保存
     restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
     healthcheck:  # コンテナが立ち上がったかチェック。
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090"]
@@ -23,14 +28,17 @@ services:
   node:  # node-expoter公式ドキュメントの設定（network_modeの部分だけカスタムネットワークに変更）。
     image: quay.io/prometheus/node-exporter:v1.9.1  # 5月24日時点で最新
     container_name: node
-    command:
-      - "--path.rootfs=/host"
     networks:  # カスタムブリッジネットワーク。
       - mynetwork
     pid: host  # ホストOSのプロセスID (PID) 名前空間をコンテナと共有
-    restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
+    cap_drop:
+      - SYS_PTRACE  # ホストのプロセスを操作する機能を禁止
+      - SYS_ADMIN  # システム管理機能の禁止
     volumes:
       - '/:/host:ro,rslave'
+    command:
+      - "--path.rootfs=/host"
+    restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
     healthcheck:  # コンテナが立ち上がったかチェック。
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:9100"]
       interval: 10s
@@ -47,10 +55,16 @@ services:
       - mynetwork
     volumes:
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - grafana_data:/var/lib/grafana  # 本番環境では権限の関係でエラーとなりコンテナが立ち上がらないのでボリュームマウントを作成するといいらしい。
+      # 本番環境では権限の関係でエラーとなりコンテナが立ち上がらないのでボリュームマウントを作成するといいらしい。
+      - grafana_data:/var/lib/grafana
     ports:
       - "3000:3000"
-    restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_PASSWORD}
+      GF_LOG_LEVEL: warn
+    # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
+    restart: unless-stopped  
     healthcheck:  # コンテナが立ち上がったかチェック。
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
       interval: 10s
@@ -73,15 +87,24 @@ services:
       - ./secret/ssl:/etc/ssl
       - ./secret/.htpasswd:/etc/nginx/.htpasswd
       - ./nginx/conf.d/dev.conf:/etc/nginx/conf.d/dev.conf
-    command: ["sh", "-c", "rm -f /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]  # 'daemon of'はNginxをフォアグラウンドで実行する（コンテナプロセスが終了しないように）。
     ports:
       - "80:80"
       - "443:443"
+    # 'daemon of'はNginxをフォアグラウンドで実行する（コンテナプロセスが終了しないように）。   
+    command: ["sh", "-c", "rm -f /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
     restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
     depends_on:  # 依存関係のコンテナを設定。
       grafana:
         condition: service_healthy
-
+  
+  # ===================
+  # prod-nginxとdev-nginxとの相違点
+  #
+  #  - container_name
+  #  - volumes: envsubstでテンプレートファイルを読み込む設定
+  #  - ports: ホスト側で80番と443番が使用済みなので8080番と8443番を適用
+  #  - environment: .envファイルによる環境変数の適用
+  # ===================
   prod-nginx:
     profiles:
       - prod
@@ -92,11 +115,15 @@ services:
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - /var/www:/var/www  # Let's Encryptの証明書を配置するディレクトリとBacik認証ファイル
-      - ./nginx/conf.d/prod.conf:/etc/nginx/conf.d/prod.conf  # 本願環境用の設定ファイル
-    command: ["sh", "-c", "rm -f /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]  # 'daemon of'はNginxをフォアグラウンドで実行する（コンテナプロセスが終了しないように）。
+      - ./nginx/templates:/etc/nginx/templates  # 本番環境用の設定ファイル
     ports:  # ホスト側のポートで80番443番が使用済みなので8080と8443で割り当て
       - "8080:80" 
       - "8443:443"
+    environment:
+      - IP_ADDRESS=${IP_ADDRESS}
+      - FREE_DOMAIN=${FREE_DOMAIN}
+      - DOMAIN=${DOMAIN}
+      - TARGET_IP=${TARGET_IP}
     restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。
     depends_on:  # 依存関係のコンテナを設定。
       grafana:
@@ -104,6 +131,7 @@ services:
           
 volumes:
   grafana_data:
+  prometheus_data:
 
 networks:  # カスタムブリッジネットワークの作成。
   mynetwork:
