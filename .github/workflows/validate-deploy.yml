@@ -133,15 +133,15 @@ jobs:
           filters:
             compose:
               - 'compose.yml'
-            other:
-              - '**'
+            # other:
+              # - '**'
 
       # ================================================
       # compose以外のファイルが更新されたらリスタートする
       # ================================================
       - name: Restart Docker Compose (if other files changed)
         # if: ${{ !env.ACT && env.CHANGE_FILE == 'other' }}
-        if: ${{ !env.ACT && steps.filter.outputs.other == 'true' }}
+        if: ${{ !env.ACT && steps.changes.outputs.compose != 'true' }}
         uses: appleboy/ssh-action@v0.1.6
         with:
           key: ${{ secrets.SSH_KEY }}
@@ -159,7 +159,7 @@ jobs:
       # ======================================
       - name: Start Docker Compose (if compose.yml changed)
         # if: ${{ !env.ACT && env.CHANGE_FILE == 'compose' }}
-        if: ${{ !env.ACT && steps.filter.outputs.compose == 'true' }}
+        if: ${{ !env.ACT && steps.chages.outputs.compose == 'true' }}
         uses: appleboy/ssh-action@v0.1.6
         with:
           key: ${{ secrets.SSH_KEY }}
