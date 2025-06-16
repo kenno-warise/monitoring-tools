@@ -119,7 +119,7 @@ services:
     ports:  # ホスト側のポートで80番443番が使用済みなので8080と8443で割り当て
       - "8080:80" 
       - "8443:443"
-    environment: # nginx/templates/...に渡される環境変数.
+    environment: # nginx/templates/...に渡される環境変数
       - IP_ADDRESS=${IP_ADDRESS}
       - FREE_DOMAIN=${FREE_DOMAIN}
       - DOMAIN=${DOMAIN}
