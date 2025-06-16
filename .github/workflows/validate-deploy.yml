@@ -130,7 +130,7 @@ jobs:
         if: ${{ !env.ACT }}
         uses: dorny/paths-filter@v3
         with:
-          filters:
+          filters: |
             compose:
               - 'compose.yml'
             # other:
