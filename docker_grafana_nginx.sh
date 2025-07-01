@@ -28,13 +28,20 @@ docker run --name grafana \
   -v ./grafana/data:/var/lib/grafana \
   --restart unless-stopped \
   -d -p 3000:3000 \
+  -e GF_SMTP_ENABLED=true \
+  -e GF_SMTP_HOST=smtp.gmail.com:587 \
+  -e GF_SMTP_USER=zerofromlight0325@gmail.com \
+  -e GF_SMTP_PASSWORD=hzwwsjkxgdnlzxxe \
+  -e GF_SMTP_SKIP_VERIFY=false \
+  -e GF_SMTP_ADDRESS=zerofromlight0325@gmail.com \
+  -e GF_SMTP_FROM_NAME=Grafana \
   grafana/grafana-oss
 
 # Nginxの設定ファイルを元にリバースプロキシを実行
 docker run --name nginx \
   -v ./secret/ssl:/etc/ssl \
   -v ./secret/.htpasswd:/etc/nginx/.htpasswd \
-  -v ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+  -v ./nginx/conf.d/dev.conf:/etc/nginx/conf.d/dev.conf \
   --network mynetwork \
   -d -p 80:80 -p 443:443 \
   nginx:latest
