@@ -1,4 +1,4 @@
-.env
 grafana/data/*
 secret
+src
 nohup.out
