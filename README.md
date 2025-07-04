@@ -1,55 +1,144 @@
-# Monitoring-tools
+# Monitoring-tools (Dockerized Grafana)
 
-### **プロジェクトバックログ**
+## 概要
 
-|**1. 初期セットアップ**|進行状況|
+Monitoring-toolsの概要は、Docker上で構築されたGrafanaを利用するための環境を提供します。
+
+Grafanaはシステムの監視ツールとして有名なサービスです。
+
+![Example Grafana dashboard](doc/img/grafana_dashboard.jpg)
+
+- [Grafanaサイト](https://grafana.com/ja/)
+
+Monitoring-toolsではシステムのリソースを監視するために、Node Expoter、Prometheusというツールを使用してGrafanaへデータを送りグラフとして表示します。
+
+![Docker container configuration diagram](doc/img/container_diagram.png)
+
+DockerおよびDocker Composeが導入済みならすぐに始められます。
+
+## セットアップ手順
+
+確認済みのDocker及びDocker Composeのバージョン
+
+|名前|バージョン|
 |----|----|
-|開発環境の Docker インストールと動作確認|〇|
-|本番環境（CentOS7）の Docker インストールと動作確認|〇|
-|ネットワーク構成の設計（コンテナ間通信を確立）|〇|
+|Docker|26.1.4移行|
+|Docker Compose|v2.27.1移行|
 
-|**2. ツールの導入**|進行状況|
-|----|----|
-|**Nginxコンテナの構築と設定**|---|
-|デフォルトのNginxサイトを表示|〇|
-|HTMLファイルを作成してリリースしてみる|〇|
-|SSLに対応した設定|〇|
-|プロキシの設定|〇|
-|**Prometheus コンテナの構築と設定**|---|
-|必要なターゲットの定義|〇|
-|**Node Exporter コンテナの構築と設定**|---|
-|メトリクス収集の設定|〇|
-|本番・開発環境で動作確認|〇|
-|**Grafana コンテナの構築と設定**|---|
-|ダッシュボードの作成（Prometheus データソースの追加）|〇|
-|ユーザーロールの定義とセキュリティ設定|〇|
+任意のディレクトリにて、クローンします。
 
-|**3. 実装テスト**|進行状況|
-|----|----|
-|**Docker Compose を使用した統合環境テスト**|---|
-|コンテナ間通信の確認|〇|
-|**Prometheus のメトリクス収集状況の検証**|---|
-|Grafana ダッシュボード表示テスト|〇|
-|メトリクスの可視化確認|〇|
+```bash
+git clone https://github.com/kenno-warise/monitoring-tools.git
 
-|**4. 本番環境への移行**|進行状況|
-|----|----|
-|CentOS7でのすべてのコンテナのデプロイ|〇|
-|開発環境から本番環境へのデータ移行手順の確立|〇|
-|**自動化スクリプトの作成（デプロイとアップデートの簡素化）**|---|
-|workflowファイルの作成とCIの設定|〇|
-|CDの設定|〇|
+cd monitoring-tools
+```
 
-|**5. 継続的な改善**|進行状況|
-|----|----|
-|アラートの設定（Prometheus での監視強化）||
-|**Grafana ダッシュボードの最適化**|---|
-|チームのフィードバックに基づく改善||
-|**Node Exporter のカスタムメトリクス作成**|---|
-|サーバに合わせた監視項目追加||
+Monitoring-toolsが必要とするディレクトリ構成一覧（それ以外のファイルはCI/CDに必要なファイルなので無視しても大丈夫です）
 
-|**6. ドキュメント整備**|進行状況|
+```
+monitoring-tools
+├── .env
+├── compose.yml
+├── nginx
+│   ├── conf.d
+│   │   └── dev.conf
+│   └── templates
+│       └── default.conf.template
+├── prometheus
+│   └── prometheus.yml
+```
+
+各ファイルの役割
+
+|ファイル|役割|
 |----|----|
-|セットアップ手順書の作成||
-|トラブルシューティングガイドの作成||
-|アジャイル開発プロセスの振り返りレポート||
+|.env |環境変数用の設定ファイル |
+|compose.yml |Docker Composeの設定ファイル |
+|dev.mount_change.sh |ローカル環境で実行する場合は、ルートディレクトリのマウントタイプをsharedにする必要があるので、Docker Composeを起動する前に実行 |
+|nginx |Nginxのプロキシ設定が定義されているテンプレートファイル（本番環境用）と設定ファイル（開発環境用）が配置されているディレクトリ|
+|prometheus |メトリクスを収集するたの設定ファイルが配置されているディレクトリ|
+
+### 開発環境で試す場合
+
+開発環境でMonitoring-toolsを試す場合は、今のところルート「/」のマウント伝播タイプをsharedに変更する必要があります。
+
+なぜならNode Expoterコンテナはホスト側のルートと同期をしてリソースを収集するので、同期後もデータが更新されるようにするためです。
+
+ただしこれは開発環境の場合のみかもしれません。
+
+ルートのマウントの伝播タイプの確認
+```bash
+findmnt -o TARGET,PROPAGATION /
+```
+
+ルートのマウントの伝播タイプをsharedに変更
+```bash
+sudo mount --make-rshared /
+```
+
+### 本番環境の設定
+
+Monitoring-toolsに必要な環境変数を設定する.envファイルを作成
+
+この環境変数はNginxとGrafanaに割り当てる変数で本番環境での設定に有効です。開発環境では開発用のNginxを起動させるので環境変数の設定は不要です。
+
+- IP_ADDRESS：サーバーのIPアドレス
+- FREE_DOMAIN：無料ドメインorサブドメイン
+- DOMAIN：名前解決されているドメイン
+- TARGET_IP：セキュリティ上、アクセスが許可されるIPアドレス
+- GF_USER：Grafanaサービスのログインユーザー名
+- GF_PASSWORD：Grafanaサービスのログインパスワード
+- GF_SMTP_USER：SMTPのユーザー名
+- GF_SMTP_PASSWORD：SMTPのパスワード
+
+例
+
+```
+IP_ADDRESS=111.222.33.444
+FREE_DOMAIN=example.ne.jp
+DOMAIN=example.com
+TARGET_IP=00.11.22.33
+GF_USER=admin
+GF_PASSWORD=admin
+GF_SMTP_USER=example@gmail.com
+GF_SMTP_PASSWORD=password
+```
+
+.envファイルはカレントディレクトリに配置するとDocker Composeの実行時に自動で読み込まれます。
+
+
+```
+monitoring-tools
+├── .env
+├── compose.yml
+├── ...
+```
+
+### Docker Composeの実行
+
+**開発環境で実行する場合**
+
+```bash
+sudo docker compose --profile dev up -d
+```
+
+起動後、少し時間をおいて127.0.0.1にアクセスすると、ログイン画面が表示されます。
+
+**本番環境で実行する場合**
+
+```bash
+sudo docker compose --profile prod up -d
+```
+
+'FREE_DOMAIN'に設定したドメインにアクセスすると、ログイン画面が表示されます。
+
+![Grafana login page](doc/img/grafana_login.jpg)
+
+必要であれば日本語設定も行えます。
+
+- 画面右上のアイコンをクリックしProfileに移動
+- Preferences項目の「Language」から日本語を選択
+- 確認してSave
+
+![Grafana jpanise config](doc/img/grafana_jp_config.jpg)
+
