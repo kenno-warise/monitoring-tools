@@ -22,8 +22,8 @@ DockerおよびDocker Composeが導入済みならすぐに始められます。
 
 |名前|バージョン|
 |----|----|
-|Docker|26.1.4移行|
-|Docker Compose|v2.27.1移行|
+|Docker|26.1.4以降|
+|Docker Compose|v2.27.1以降|
 
 任意のディレクトリにて、クローンします。
 
@@ -52,7 +52,7 @@ monitoring-tools
 
 |ファイル|役割|
 |----|----|
-|.env |環境変数用の設定ファイル |
+|.env |本番環境での環境変数用の設定ファイル |
 |compose.yml |Docker Composeの設定ファイル |
 |dev.mount_change.sh |ローカル環境で実行する場合は、ルートディレクトリのマウントタイプをsharedにする必要があるので、Docker Composeを起動する前に実行 |
 |nginx |Nginxのプロキシ設定が定義されているテンプレートファイル（本番環境用）と設定ファイル（開発環境用）が配置されているディレクトリ|
@@ -80,7 +80,11 @@ sudo mount --make-rshared /
 
 Monitoring-toolsに必要な環境変数を設定する.envファイルを作成
 
-この環境変数はNginxとGrafanaに割り当てる変数で本番環境での設定に有効です。開発環境では開発用のNginxを起動させるので環境変数の設定は不要です。
+この環境変数はNginxとGrafanaに割り当てる変数で本番環境での設定に有効です。
+
+
+
+※ 開発環境では開発用のNginxを起動させるので環境変数の設定は不要です。
 
 - IP_ADDRESS：サーバーのIPアドレス
 - FREE_DOMAIN：無料ドメインorサブドメイン
@@ -90,6 +94,14 @@ Monitoring-toolsに必要な環境変数を設定する.envファイルを作成
 - GF_PASSWORD：Grafanaサービスのログインパスワード
 - GF_SMTP_USER：SMTPのユーザー名
 - GF_SMTP_PASSWORD：SMTPのパスワード
+
+'TARGET_IP'ではセキュリティ上の理由から、許可されたIPアドレスのみのアクセスを有効にします。
+
+例えば現在利用中のWi-Fiルーター経由のIPアドレスを取得するには以下を実行します。
+
+```bash
+curl -s ifconfig.me
+```
 
 例
 
