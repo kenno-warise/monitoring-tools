@@ -54,7 +54,6 @@ monitoring-tools
 |----|----|
 |.env |本番環境での環境変数用の設定ファイル |
 |compose.yml |Docker Composeの設定ファイル |
-|dev.mount_change.sh |ローカル環境で実行する場合は、ルートディレクトリのマウントタイプをsharedにする必要があるので、Docker Composeを起動する前に実行 |
 |nginx |Nginxのプロキシ設定が定義されているテンプレートファイル（本番環境用）と設定ファイル（開発環境用）が配置されているディレクトリ|
 |prometheus |メトリクスを収集するたの設定ファイルが配置されているディレクトリ|
 
