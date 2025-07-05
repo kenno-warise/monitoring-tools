@@ -5,6 +5,7 @@
   - [開発環境で試す場合](#開発環境で試す場合)
   - [本番環境の設定](#本番環境の設定)
   - [Docker Composeの実行](#docker-composeの実行)
+- [フィードバック・お問い合わせ](#フィードバックお問い合わせ)
 
 ## 概要
 
@@ -159,3 +160,6 @@ sudo docker compose --profile prod up -d
 
 ![Grafana jpanise config](doc/img/grafana_jp_config.jpg)
 
+## フィードバック・お問い合わせ
+
+- バグ報告・改善提案は[Discussion](https://github.com/kenno-warise/monitoring-tools/discussions/56)へどうぞ。
