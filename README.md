@@ -160,6 +160,12 @@ sudo docker compose --profile prod up -d
 
 ![Grafana jpanise config](doc/img/grafana_jp_config.jpg)
 
+## トラブルシューティング
+
+一部の環境で起こりうる問題と対策を以下にまとめています：
+
+- [トラブルシューティングガイド](doc/troubleshooting.md)
+
 ## フィードバック・お問い合わせ
 
 - バグ報告・改善提案は[Discussion](https://github.com/kenno-warise/monitoring-tools/discussions/56)へどうぞ。
