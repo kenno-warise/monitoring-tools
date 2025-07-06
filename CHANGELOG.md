@@ -1,5 +1,19 @@
 # CHANGELOG.md
 
+## アジャイル開発プロセスの振り返りレポート
+
+- 以下のファイルを新規作成
+
+```
+├── .github
+│   ├── pull_request_template.md
+├── docs
+│   ├── retrospectives
+```
+
+- .github/pull_request_template.md：Pull Request用のテンプレート
+- docs/retrospectives：スプリントの振り返りレポートを管理するディレクトリ
+
 ## v1.0.1 - マイナーチェンジ
 
 トラブルシューティングガイドやバージョン情報の確認に伴う変更
