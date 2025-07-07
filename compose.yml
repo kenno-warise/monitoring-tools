@@ -90,12 +90,9 @@ services:
     networks:  # カスタムブリッジネットワーク。
       - mynetwork
     volumes:
-      - ./secret/ssl:/etc/ssl
-      - ./secret/.htpasswd:/etc/nginx/.htpasswd
       - ./nginx/conf.d/dev.conf:/etc/nginx/conf.d/dev.conf
     ports:
       - "80:80"
-      - "443:443"
     # 'daemon of'はNginxをフォアグラウンドで実行する（コンテナプロセスが終了しないように）。   
     command: ["sh", "-c", "rm -f /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
     restart: unless-stopped  # 再起動ポリシーでunless-stoppedに設定。手動で停止しない限り再起動する。

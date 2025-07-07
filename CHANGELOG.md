@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## v1.1.1 - SSL証明書がNginxコンテナで読込不可になる件
+
+- dev-nginxでSSL自己証明書が読み込めないというエラーで、SSL自己証明書の設定を廃止にしました。nginx/conf.d/dev.confのhttps（443）ブロックの削除とcompose.ymlでのマウントを修正。
+
+
 ## アジャイル開発プロセスの振り返りレポート
 
 - 以下のファイルを新規作成
