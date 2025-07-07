@@ -33,12 +33,20 @@ DockerおよびDocker Composeが導入済みならすぐに始められます。
 |Docker|26.1.4以降|
 |Docker Compose|v2.27.1以降|
 
-任意のディレクトリにて、クローンします。
+任意のディレクトリにて、クローンもしくはtar.gzをダウンロードします。
 
 ```bash
 git clone https://github.com/kenno-warise/monitoring-tools.git
 
 cd monitoring-tools
+```
+
+```bash
+curl -L https://github.com/kenno-warise/monitoring-tools/archive/refs/tags/vx.x.x.tar.gz
+
+tar -xvzf monitoring-tools-x.x.x.tar.gz
+
+cd monitoring-tools-x.x.x
 ```
 
 Monitoring-toolsが必要とするディレクトリ構成一覧（それ以外のファイルはCI/CDに必要なファイルなので無視しても大丈夫です）
