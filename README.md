@@ -14,13 +14,13 @@ Monitoring-toolsの概要は、Docker上で構築されたGrafanaを利用する
 
 Grafanaはシステムの監視ツールとして有名なサービスです。
 
-![Example Grafana dashboard](doc/img/grafana_dashboard.jpg)
+![Example Grafana dashboard](docs/img/grafana_dashboard.jpg)
 
 - [Grafanaサイト](https://grafana.com/ja/)
 
 Monitoring-toolsではシステムのリソースを監視するために、Node Expoter、Prometheusというツールを使用してGrafanaへデータを送りグラフとして表示します。
 
-![Docker container configuration diagram](doc/img/container_diagram.png)
+![Docker container configuration diagram](docs/img/container_diagram.png)
 
 DockerおよびDocker Composeが導入済みならすぐに始められます。
 
@@ -159,7 +159,7 @@ sudo docker compose --profile prod up -d
 
 'FREE_DOMAIN'に設定したドメインにアクセスすると、ログイン画面が表示されます。
 
-![Grafana login page](doc/img/grafana_login.jpg)
+![Grafana login page](docs/img/grafana_login.jpg)
 
 必要であれば日本語設定も行えます。
 
@@ -167,13 +167,13 @@ sudo docker compose --profile prod up -d
 - Preferences項目の「Language」から日本語を選択
 - 確認してSave
 
-![Grafana jpanise config](doc/img/grafana_jp_config.jpg)
+![Grafana jpanise config](docs/img/grafana_jp_config.jpg)
 
 ## トラブルシューティング
 
 一部の環境で起こりうる問題と対策を以下にまとめています：
 
-- [トラブルシューティングガイド](doc/troubleshooting.md)
+- [トラブルシューティングガイド](docs/troubleshooting.md)
 
 ## フィードバック・お問い合わせ
 
