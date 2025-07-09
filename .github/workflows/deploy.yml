@@ -1,3 +1,4 @@
+
 name: Deploy Monitoring Stack to Production
 
 on:
@@ -5,61 +6,6 @@ on:
 
 
 jobs:
-  # ==========================================
-  # PrometheusとNginxの設定ファイル検証フェーズ
-  # ==========================================
-  validate-configs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-  
-      - name: Create secret directories and files
-        if: ${{ !env.ACT }}
-        run: |
-          mkdir -p ./secret/ssl  # ディレクトリを作成
-          echo "${{ secrets.SSL_CERT }}" > ./secret/ssl/my_certificate.crt
-          echo "${{ secrets.SSL_KEY }}" > ./secret/ssl/my_private.key
-          echo "${{ secrets.HTPASSWD }}" > ./secret/.htpasswd
-      
-      - name: Create Network(Actions)
-        if: ${{ !env.ACT }}
-        run: docker network create mynetwork
-      
-      - name: Integration test(Actions and ACT)
-        run: docker compose --profile dev up -d
-  
-      - name: Validate Prometheus config file(Actions and ACT)
-        run: docker exec prometheus promtool check config /etc/prometheus/prometheus.yml
-  
-      - name: Validate Nginx config file(Actions and ACT)
-        run: docker exec dev-nginx nginx -t
-  
-      - name: Check Prometheus API(Actions and ACT)
-        run: curl -fsS http://localhost:9090/api/v1/status/runtimeinfo
-  
-      - name: Check Grafana API(Actions and ACT)
-        run: curl -fsS http://localhost:3000/api/health
-  
-      - name: Docker Compose down(Actions and ACT)
-        run: docker compose --profile dev down
-  
-          # - name: Run Prometheus container and validation config
-          #   run: |
-          #     docker run -d --name prometheus -v ./prometheus:/etc/prometheus prom/prometheus
-          #     docker exec prometheus promtool check config /etc/prometheus/prometheus.yml
-          #     docker rm -f prometheus
-          # 
-          # - name: Run Grafana and Nginx container is validation config
-          #   run: |
-          #     docker run -d --name grafana --network mynetwork -p 3000:3000 grafana/grafana
-          #     docker run --rm --network mynetwork \
-          #     -v ./nginx/conf.d/dev.conf:/etc/nginx/conf.d/dev.conf \
-          #     -v ./secret/ssl:/etc/ssl \
-          #     -v ./secret/.htpasswd:/etc/nginx/.htpasswd \
-          #     nginx nginx -t
-          #     docker rm -f grafana
-  
   # ================
   # デプロイフェーズ
   # ================
@@ -69,20 +15,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      # ===============================================================
-      # リポジトリを差分転送する（転送する前に不要なファイルは除外する）
-      # ===============================================================
-      # - name: Deploy to server via rsync
-      #   uses: trendyminds/github-actions-rsync@master
-      #   with:
-      #     RSYNC_OPTIONS: "-avzr --exclude-from=.rsyncignore -e 'ssh -p ${{ secrets.SSH_PORT }}'"
-      #     RSYNC_TARGET: "/home/${{ SSH_USER }}/monitoring-tools"
-      #     RSYNC_SOURCE: "./"
-      #   env:
-      #     SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-      #     SSH_USERNAME: ${{ secrets.SSH_USER }}
-      #     SSH_HOSTNAME: ${{ secrets.SSH_DOMAIN }}
       
       - name: Update and Install rsync
         if: ${{ !env.ACT }}
@@ -118,14 +50,6 @@ jobs:
       # 更新されたファイルがcomposeかotherか判定する
       # ==========================================
       - name: Check changed files
-        # id: check_files
-        # run: |
-        #   git diff --name-only HEAD^
-        #   if git diff --name-only HEAD^ | grep -o "compose.yml"; then
-        #     echo "CHANGE_FILE=compose" >> $GITHUB_ENV
-        #   else
-        #     echo "CHANGE_FILE=other" >> $GITHUB_ENV
-        #   fi
         id: changes
         if: ${{ !env.ACT }}
         uses: dorny/paths-filter@v3

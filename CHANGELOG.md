@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## ワークフローファイルをCIとCD分ける
+
+- validate-deploy.yml内のdeployブロックを別のCD用ファイルにコピペ。
+- それぞれvalidate.yml、deploy.ymlとして名前変更。
+- validate.ymlとdeploy.ymlのリファクタリング。
+- deploy.ymlで使用していたファイルの除外。
+
+
 ## v1.1.1 - SSL証明書がNginxコンテナで読込不可になる件
 
 - dev-nginxでSSL自己証明書が読み込めないというエラーで、SSL自己証明書の設定を廃止にしました。nginx/conf.d/dev.confのhttps（443）ブロックの削除とcompose.ymlでのマウントを修正。
