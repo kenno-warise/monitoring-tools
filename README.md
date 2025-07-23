@@ -10,15 +10,15 @@
 
 ## 概要
 
-Monitoring-toolsの概要は、Docker上で構築されたGrafanaを利用するための環境を提供します。
+Monitoring-toolsの概要は、Dockerで構築されたGrafanaを利用するための環境を提供します。
 
-Grafanaはシステムの監視ツールとして有名なサービスです。
+Grafanaはモダンなグラフを表示するサービスとして有名です。
 
 ![Example Grafana dashboard](docs/img/grafana_dashboard.jpg)
 
 - [Grafanaサイト](https://grafana.com/ja/)
 
-Monitoring-toolsではシステムのリソースを監視するために、Node Expoter、Prometheusというツールを使用してGrafanaへデータを送りグラフとして表示します。
+Monitoring-toolsではシステムのリソースを監視するために、Node Expoter、Prometheusというツールを使用し、Prometheusのソースを利用してGrafanaでモダンなグラフとして表示します。
 
 ![Docker container configuration diagram](docs/img/container_diagram.png)
 
