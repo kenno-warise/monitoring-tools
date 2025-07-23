@@ -97,13 +97,11 @@ Monitoring-toolsに必要な環境変数を設定する.envファイルを作成
 
 この環境変数はNginxとGrafanaに割り当てる変数で本番環境での設定に有効です。
 
-
-
-※ 開発環境では開発用のNginxを起動させるので環境変数の設定は不要です。
+※ `.env`を編集したらDockerをダウンさせて起動してください。
 
 - IP_ADDRESS：サーバーのIPアドレス
 - FREE_DOMAIN：無料ドメインorサブドメイン
-- DOMAIN：名前解決されているドメイン
+- DOMAIN：SSL認証を受けているドメイン
 - TARGET_IP：セキュリティ上、アクセスが許可されるIPアドレス
 - GF_USER：Grafanaサービスのログインユーザー名
 - GF_PASSWORD：Grafanaサービスのログインパスワード
@@ -113,6 +111,8 @@ Monitoring-toolsに必要な環境変数を設定する.envファイルを作成
 'TARGET_IP'ではセキュリティ上の理由から、許可されたIPアドレスのみのアクセスを有効にします。
 
 例えば現在利用中のWi-Fiルーター経由のIPアドレスを取得するには以下を実行します。
+
+※　Wi-Fiルーター経由のIPアドレスは定期的に変化する場合があるので、その都度変更が必要です。
 
 ```bash
 curl -s ifconfig.me
